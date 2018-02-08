@@ -1,5 +1,15 @@
-require "coin_falcon/version"
+require 'net/http'
+require 'json'
+require 'openssl'
+
+require 'coin_falcon/client'
+
+require 'coin_falcon/version'
 
 module CoinFalcon
-  # Your code goes here...
+  @api_base = 'https://staging.coinfalcon.com/api/v1/'
+
+  class << self
+    attr_accessor :api_base
+  end
 end
