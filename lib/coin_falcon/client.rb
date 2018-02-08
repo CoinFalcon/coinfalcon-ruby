@@ -2,71 +2,99 @@ module CoinFalcon
   # Client executes requests against the CoinFalcon API.
   #
   class Client
-    KEY_HEADER  = 'CF-API-KEY'.freeze
-    TIME_HEADER = 'CF-API-TIMESTAMP'.freeze
-    SIGN_HEADER = 'CF-API-SIGNATURE'.freeze
+    ENDPOINT = 'https://staging.coinfalcon.com'.freeze
+    VERSION = 1
 
-    attr_reader :api_key, :api_secret
-
-    def initialize(api_key, api_secret)
-      @api_key = api_key
-      @api_secret = api_secret
-    end
-
-    def orderbook(market)
-      url = build_url("markets/#{market}/orders")
-
-      response = get(url)
-
-      JSON.parse(response.body)
+    def initialize(key, secret, endpoint = ENDPOINT, version = VERSION)
+      @conn = Connection.new(key, secret, endpoint, version)
     end
 
     def accounts
-      url = build_url('user/accounts')
+      path = 'user/accounts'
 
-      response = get(url)
+      conn.get(path)
+    end
 
-      JSON.parse(response.body)
+    def create_order(order)
+      path = 'user/orders'
+
+      conn.post(path, order)
+    end
+
+    def cancel_order(id)
+      path = "user/orders/#{id}"
+
+      conn.delete(path)
+    end
+
+    def my_orders(params = nil)
+      path = 'user/orders'
+
+      conn.get(path, params)
+    end
+
+    def my_trades(params = nil)
+      path = 'user/trades'
+
+      conn.get(path, params)
+    end
+
+    def deposit_address(currency)
+      path = 'account/deposit_address'
+
+      conn.get(path, { currency: currency })
+    end
+
+    def deposit_history(params = nil)
+      path = 'account/deposits'
+
+      conn.get(path, params)
+    end
+
+    def deposit_details(id)
+      path = 'account/deposit'
+
+      conn.get(path, { id: id })
+    end
+
+    def create_withdrawal(params)
+      path = 'account/withdraw'
+
+      conn.post(path, params)
+    end
+
+    def withdrawal_details(id)
+      path = 'account/withdrawal'
+
+      conn.get(path, { id: id })
+    end
+
+    def withdrawal_history(params = nil)
+      path = 'account/withdrawals'
+
+      conn.get(path, params)
+    end
+
+    def cancel_withdrawal(id)
+      path = "account/withdrawals/#{id}"
+
+      conn.delete(path)
+    end
+
+    def trades(market, params = nil)
+      path = "markets/#{market}/trades"
+
+      conn.get(path, params)
+    end
+
+    def orderbook(market, params = nil)
+      path = "markets/#{market}/orders"
+
+      conn.get(path, params)
     end
 
     private
 
-    def build_url(path)
-      URI(CoinFalcon.api_base + path)
-    end
-
-    def headers(method, path, body = nil)
-      timestamp = Time.now.to_i
-
-      {
-        KEY_HEADER => api_key,
-        TIME_HEADER => timestamp,
-        SIGN_HEADER => sign(timestamp, method, path, body),
-        'Content-Type' => 'application/json'
-      }
-    end
-
-    def sign(timestamp, method, path, body)
-      payload = build_payload(timestamp, method, path, body)
-
-      OpenSSL::HMAC.hexdigest('sha256', api_secret, payload)
-    end
-
-    def build_payload(timestamp, method, path, body)
-      [timestamp, method, path, body].compact.join('|')
-    end
-
-    def get(url)
-      request = Net::HTTP::Get.new(url)
-
-      headers('GET', url.path).each do |header, value|
-        request[header] = value
-      end
-
-      http = Net::HTTP.new(url.hostname, url.port)
-      http.use_ssl = true
-
-      http.request(request)
-    end
+    attr_reader :conn
   end
 end
