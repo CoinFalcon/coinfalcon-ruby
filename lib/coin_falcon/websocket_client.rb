@@ -1,33 +1,32 @@
-require 'pry-byebug'
 module CoinFalcon
   class WebsocketClient
-    # ENDPOINT = 'ws://localhost:3000/cable'
-    # ENDPOINT = 'wss://ws.coinfalcon.com'
-    # ENDPOINT = 'wss://staging.coinfalcon.com/cable'
-    ENDPOINT = 'wss://ws-staging.coinfalcon.com'
+    ENDPOINT = 'wss://ws.coinfalcon.com'.freeze
+    AUTH_PATH = '/auth/feed'.freeze
 
-    def initialize(key = nil, secret = nil)
-      @key = key
-      @secret = secret
-      @cipher = Cipher.new(@key, @secret)
+    attr_accessor :channels
+
+    def initialize(key = nil, secret = nil, endpoint = ENDPOINT)
+      @endpoint = endpoint
+      @channels = []
+      @cipher = Cipher.new(key, secret)
     end
 
     def feed
       EM.run do
-        @ws = Faye::WebSocket::Client.new(ENDPOINT, nil, { headers: headers })
+        @ws = Faye::WebSocket::Client.new(@endpoint, nil, { headers: headers })
 
         @ws.on :open do |event|
-          p [:open]
-
-          identifier = { channel: 'UserTradesChannel', market: 'ETH-BTC' }.to_json
-          request = { command: :subscribe, identifier: identifier }.to_json
-          puts request
-
-          @ws.send(request)
+          channels.each { |channel| subscribe(channel) }
         end
 
         @ws.on :message do |event|
-          p [:message, JSON.parse(event.data)]
+          data = JSON.parse(event.data)
+
+          if block_given?
+            yield data
+          else
+            p [:message, data]
+          end
         end
 
         @ws.on :close do |event|
@@ -38,10 +37,19 @@ module CoinFalcon
       end
     end
 
+    def subscribe(identifier)
+      request = { command: :subscribe, identifier: identifier.to_json }.to_json
+
+      @ws.send(request)
+    end
+
     private
 
+    def request
+      @request ||= Request.new(:get, AUTH_PATH, nil)
+    end
+
     def headers
-      request = Request.new(:get, '/auth/feed', nil)
       @cipher.sign!(request)
 
       {

@@ -20,7 +20,9 @@ Or install it yourself as:
 
 ## Usage
 
-The library needs to be configured with your account's `key` and `secret` which is available in your CoinFalcon Dashboard:
+The client needs to be configured with your account's `key` and `secret` which is available in your CoinFalcon Dashboard:
+
+## API Client
 
 ```ruby
 require 'coin_falcon'
@@ -31,15 +33,13 @@ client = CoinFalcon::Client.new(key, secret)
 It is also possible to set up an API `endpoint` and `version`:
 
 ```ruby
-require 'coin_falcon'
-
 client = CoinFalcon::Client.new(key, secret, endpoint, version)
 ```
 
 Defaults:
 
 ```ruby
-ENDPOINT = 'https://staging.coinfalcon.com'
+ENDPOINT = 'https://coinfalcon.com'
 VERSION = 1
 ```
 
@@ -72,7 +72,7 @@ client.my_orders
 ### List trades
 
 ```ruby
-client.my_trades
+client.my_trades(market: 'ETH-BTC')
 ```
 
 ### Deposit address
@@ -128,6 +128,44 @@ client.trades('ETH-BTC')
 ```ruby
 client.orderbook('ETH-BTC')
 client.orderbook('ETH-BTC', level: 3)
+```
+
+## Websocket Client
+
+```ruby
+require 'coin_falcon'
+
+websocket_client = CoinFalcon::WebsocketClient.new(key, secret)
+```
+
+It is also possible to set up an `endpoint`:
+
+```ruby
+websocket_client = CoinFalcon::WebsocketClient.new(key, secret, endpoint)
+```
+
+Defaults:
+
+```ruby
+ENDPOINT = 'wss://ws.coinfalcon.com'
+```
+
+### Set up channels
+
+```ruby
+websocket_client.channels << { channel: 'TickerChannel' } << { channel: 'OrderbookChannel', market: 'ETH-BTC' }
+```
+
+### Run feed
+
+```ruby
+websocket_client.feed
+```
+
+It is also possible to send a block
+
+```ruby
+websocket_client.feed { |msg| puts msg }
 ```
 
 ## Contributing

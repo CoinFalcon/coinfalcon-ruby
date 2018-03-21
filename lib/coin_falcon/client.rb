@@ -2,7 +2,7 @@ module CoinFalcon
   # Client executes requests against the CoinFalcon API.
   #
   class Client
-    ENDPOINT = 'https://staging.coinfalcon.com'.freeze
+    ENDPOINT = 'https://coinfalcon.com'.freeze
     VERSION = 1
 
     def initialize(key, secret, endpoint = ENDPOINT, version = VERSION)
