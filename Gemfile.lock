@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    coin_falcon (0.0.1)
+    coin_falcon (0.0.2)
       faye-websocket
 
 GEM
