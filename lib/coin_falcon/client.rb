@@ -93,6 +93,12 @@ module CoinFalcon
       conn.get(path, params)
     end
 
+    def fees
+      path = 'user/fees'
+
+      conn.get(path)
+    end
+
     private
 
     attr_reader :conn
