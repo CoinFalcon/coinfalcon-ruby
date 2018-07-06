@@ -99,6 +99,12 @@ module CoinFalcon
       conn.get(path)
     end
 
+    def markets
+      path = 'markets'
+
+      conn.get(path)
+    end
+
     private
 
     attr_reader :conn
