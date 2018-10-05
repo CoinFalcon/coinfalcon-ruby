@@ -1,6 +1,6 @@
 # CoinFalcon Ruby Library
 
-The CoinFalcon Ruby Library provides convenient access to the CoinFalcon API from applications written in the Ruby language.
+CoinFalcon Ruby Library provides convenient access to CoinFalcon API from applications written in Ruby language.
 
 ## Installation
 
@@ -170,7 +170,7 @@ websocket_client.feed { |msg| puts msg }
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/thetonyrom/coin_falcon
+Bug reports and pull requests are welcome on GitHub at https://github.com/CoinFalcon/coinfalcon-ruby
 
 ## License
 
